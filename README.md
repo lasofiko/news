@@ -1,1 +1,91 @@
-# news
+# Track: A+C
+
+# AI News Agent
+
+AI-агент на `FastAPI` для анализа темы или ссылки на статью.
+Проект закрывает требования треков `A+C`: есть внешние API, парсинг, и ответы строятся на реальных данных из инструментов.
+
+## Что делает агент
+
+- Принимает `ввод` (тема или URL).
+- Собирает данные из внешних источников.
+- Формирует итоговый ответ через LLM.
+
+## Инструменты (tools)
+
+- `parser_tool` (`trafilatura`) — извлекает текст из URL статьи.
+- `news_tool` ([NewsAPI Everything](https://newsapi.org/v2/everything)) — ищет свежие новости по теме.
+- `wiki_tool` ([Wikipedia API](https://ru.wikipedia.org/w/api.php)) — дает справочный контекст.
+
+## Маршрутизация агента
+
+- Если `ввод` — URL: `parser + news + wiki`.
+- Если `ввод` — обычная тема: `news + wiki`.
+- После сбора данных LLM (Groq API) формирует итоговый ответ.
+
+## Запуск
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Открыть документацию API:
+- `http://127.0.0.1:8000/docs`
+
+## Переменные окружения
+
+В `.env` должны быть:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.1-8b-instant
+NEWS_API_KEY=your_news_api_key
+```
+
+## Одна команда запуска (после установки зависимостей)
+
+```bash
+uvicorn app.main:app --reload
+```
+
+## Пример запроса
+
+`POST http://127.0.0.1:8000/analyze`
+
+```json
+{
+  "query": "https://example.com/article"
+}
+```
+
+или
+
+```json
+{
+  "query": "искусственный интеллект новости"
+}
+```
+
+## CLI демо в консоли
+
+Если сервер уже запущен:
+
+```bash
+python -X utf8 cli_demo.py
+```
+
+## Формат ответа API
+
+- `result` — финальный текст анализа;
+- `collected_at` — время сбора данных;
+- `news_sources` — ссылки на материалы NewsAPI;
+- `wiki_sources` — ссылки на страницы Wikipedia;
+- `news_items` — найденные новости;
+- `wiki_items` — найденные статьи Wikipedia;
+- `warning` — предупреждение, если LLM недоступна.
+
+## Источники данных и дата сбора
+
+- Источники: NewsAPI и Wikipedia API (плюс URL пользователя в сценарии со ссылкой).
+- Дата/время сбора возвращается в поле `collected_at` для каждого запроса.
