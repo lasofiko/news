@@ -47,6 +47,7 @@ def _print_wiki_items(items: list[dict]) -> None:
 
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
+
         sys.stdout.reconfigure(encoding="utf-8")
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8")
